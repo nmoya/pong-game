@@ -1,9 +1,9 @@
 {
-  "name": "init",
-  "version": "0.0.0",
-  "private": true,
+  "name": "Pong Game",
+  "version": "0.0.1",
+  "private": false,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node app.js"
   },
   "dependencies": {
     "body-parser": "~1.13.2",
