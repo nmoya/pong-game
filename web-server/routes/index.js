@@ -1,5 +1,5 @@
 var express = require('express');
-var handlebars = require('Handlebars');
+var handlebars = require('handlebars');
 var path = require('path');
 var fs = require('fs');
 var router = express.Router();
