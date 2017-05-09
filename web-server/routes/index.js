@@ -4,6 +4,7 @@ var path = require('path');
 var fs = require('fs');
 var router = express.Router();
 
+const version = new Date();
 const templateFromData = (html, data) => {
   const template = handlebars.compile(html);
   return template(data);
@@ -19,7 +20,7 @@ const servePage = (req, res, viewPath, data) => {
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
-  servePage(req, res, '../views/index.html', { title: 'Pong game!' })
+  servePage(req, res, '../views/index.html', { title: 'Pong game!', version: version });
 });
 
 const error = (err, req, res) => {
@@ -27,4 +28,4 @@ const error = (err, req, res) => {
   servePage(req, res, '../views/error.html', { message: err.message });
 }
 
-module.exports = { router, error };
+module.exports = { router, error };;

@@ -2,7 +2,7 @@ var game = new Phaser.Game(1280, 720, Phaser.AUTO, 'game-container', { preload: 
 
 function preload() {
   game.load.atlas('breakout', 'assets/breakout.png', 'assets/breakout.json');
-  game.load.image('starfield', 'assets/starfield.jpg');
+  game.load.image('field', 'assets/field.jpg');
   game.load.image('paddle-left', 'assets/paddle-vertical-left.png');
   game.load.image('paddle-right', 'assets/paddle-vertical-right.png');
 }
@@ -11,9 +11,9 @@ function preload() {
 
 var KEYBOARD_MOVEMENT_SPEED = 18;
 
-var PADDLE_X_OFFSET = 100;
+var PADDLE_X_OFFSET = 50;
 
-var BALL_SPEED_START = 600;
+var BALL_SPEED_START = 100;
 var BALL_SPEED_INCREMENT = 100;
 
 var MAX_SCORE = 1;
@@ -49,7 +49,7 @@ function create() {
   game.physics.arcade.checkCollision.right = false;
   game.physics.arcade.checkCollision.left = false;
 
-  s = game.add.tileSprite(0, 0, 1280, 720, 'starfield');
+  s = game.add.tileSprite(0, 0, 1280, 720, 'field');
 
   paddle1 = createPaddle(PADDLE_X_OFFSET, game.world.centerY, 'paddle-left');
   paddle2 = createPaddle(game.world.width - PADDLE_X_OFFSET, game.world.centerY, 'paddle-right');
