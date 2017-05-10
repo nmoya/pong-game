@@ -20,25 +20,14 @@ var MAX_SCORE = 3;
 
 /*Global Variables*/
 
-var background;
-
 var ball;
-var paddle1;
-var paddle2;
-
 var ballTimer;
 
 var isBallReady = true;
 var isGameOver = false;
 
-var scorePaddle1 = 0;
-var scorePaddle2 = 0;
-
 var scoreText;
 var introText;
-
-var startKey;
-var leftPaddleKeys;
 
 var player1;
 var player2;
@@ -52,41 +41,35 @@ function create() {
   game.physics.arcade.checkCollision.right = false;
   game.physics.arcade.checkCollision.left = false;
 
-  background = game.add.tileSprite(0, 0, 1280, 720, 'field');
-
-  //if player object works, start comment
-  paddle1 = createPaddle(PADDLE_X_OFFSET, game.world.centerY, 'paddle-left');
-  paddle2 = createPaddle(game.world.width - PADDLE_X_OFFSET, game.world.centerY, 'paddle-right');
-  //if player object works, end comment
-
+  game.add.tileSprite(0, 0, 1280, 720, 'field');
   ball = createBall(game.world.centerX, game.world.centerY, 'ball_1.png')
 
-  player1 = createPlayer({ x: PADDLE_X_OFFSET, y: game.world.centerY, asset: 'paddle-left' }, true);
-  player2 = createPlayer({ x: game.world.width - PADDLE_X_OFFSET, y: game.world.centerY, asset: 'paddle-right' }, false);
+  player1 = Player({ x: PADDLE_X_OFFSET, y: game.world.centerY, asset: 'paddle-left' }, true);
+  player2 = Player({ x: game.world.width - PADDLE_X_OFFSET, y: game.world.centerY, asset: 'paddle-right' }, false);
 
-  //if player object works, comment line bellow
-  createKeys();
+  // Sets ENTER as the game start key
+  game.input.keyboard.addKey(Phaser.Keyboard.ENTER).onDown.add(checkGameState, this);
 
   createTexts();
 }
 
-function createPlayer(paddleInfo, addKeys) {
-  var player = { paddle: createPaddle(paddleInfo.x, paddleInfo.y, paddleInfo.asset), score: 0 };
+function Player(options, isKeyboard) {
+  var player = { paddle: createPaddle(options.x, options.y, options.asset), score: 0 };
 
-  player.movePaddle = function() {
-    if (this.keys === undefined) {
-      return;
+  player.movePaddle = function (gameInput) {
+    if (this.keys === undefined && gameInput) {
+      this.paddle.y = gameInput.y;
+    } else {
+      if (this.keys.up.isDown) {
+        this.paddle.y -= KEYBOARD_MOVEMENT_SPEED;
+      } else if (this.keys.down.isDown) {
+        this.paddle.y += KEYBOARD_MOVEMENT_SPEED;
+      }
     }
-    if (this.keys.up.isDown) {
-      this.paddle1.y -= KEYBOARD_MOVEMENT_SPEED;
-    } else if (this.keys.down.isDown) {
-      this.paddle1.y += KEYBOARD_MOVEMENT_SPEED;
-    }
-
     this.limitPaddleMovements();
   }
 
-  player.limitPaddleMovements = function() {
+  player.limitPaddleMovements = function () {
     if (this.paddle.y < 30) {
       this.paddle.y = 30;
     } else if (this.paddle.y > game.height - 30) {
@@ -94,17 +77,17 @@ function createPlayer(paddleInfo, addKeys) {
     }
   };
 
-  if (addKeys) {
-    player.keys = createKeys();
+  if (isKeyboard) {
+    player.keys = createMovementKeys();
   }
+  return player;
 }
 
-function createKeys() {
+function createMovementKeys() {
   //for cursor keys, use game.input.keyboard.createCursorKeys()
-  leftPaddleKeys = game.input.keyboard.addKeys({ 'up': Phaser.Keyboard.W, 'down': Phaser.Keyboard.S });
+  var keys = game.input.keyboard.addKeys({ 'up': Phaser.Keyboard.W, 'down': Phaser.Keyboard.S });
 
-  startKey = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
-  startKey.onDown.add(checkGameState, this);
+  return keys;
 }
 
 function createTexts() {
@@ -115,8 +98,8 @@ function createTexts() {
   });
   introText.anchor.setTo(0.5, 0.5);
 
-  scoreText = game.add.text(game.world.centerX, game.world.height - 50, `${scorePaddle1} - ${scorePaddle2}`, {
-    font: "30px Arial",
+  scoreText = game.add.text(game.world.centerX, game.world.height - 50, `${player1.score}     -     ${player2.score}`, {
+    font: "48px Arial",
     fill: "#666666",
     align: "center"
   });
@@ -150,25 +133,12 @@ function createBall(x, y) {
 
 function update() {
 
-  //player2.paddle.y = game.input.y;
-  //player2.limitPaddleMovements();
-  //player1.movePaddle();
-
-  //if player object works, start comment
-  paddle2.y = game.input.y;
-  if (leftPaddleKeys.up.isDown) {
-    paddle1.y -= KEYBOARD_MOVEMENT_SPEED;
-  } else if (leftPaddleKeys.down.isDown) {
-    paddle1.y += KEYBOARD_MOVEMENT_SPEED;
-  }
-
-  limitPaddleBoundaries(paddle1);
-  limitPaddleBoundaries(paddle2);
-  //if player object works, end comment
+  player1.movePaddle(game.input);
+  player2.movePaddle(game.input);
 
   if (!isBallReady && !isGameOver) {
-    game.physics.arcade.collide(ball, paddle1, ballHitPaddle, null, this);
-    game.physics.arcade.collide(ball, paddle2, ballHitPaddle, null, this);
+    game.physics.arcade.collide(ball, player1.paddle, ballHitPaddle, null, this);
+    game.physics.arcade.collide(ball, player2.paddle, ballHitPaddle, null, this);
   }
 }
 
@@ -215,11 +185,8 @@ function resetGame() {
 
   if (isGameOver) {
     isGameOver = false;
-    scorePaddle1 = 0;
-    scorePaddle2 = 0;
-
-    //player1.score = 0;
-    //player2.score = 0;
+    player1.score = 0;
+    player2.score = 0;
 
     scoreText.text = '0 - 0';
   }
@@ -232,7 +199,7 @@ function endGame() {
 
   ball.body.velocity.setTo(0, 0);
 
-  introText.text = "Player " + (scorePaddle1 == MAX_SCORE ? "One" : "Two") + " Wins";
+  introText.text = "Player " + (player1.score == MAX_SCORE ? "One" : "Two") + " Wins";
   introText.visible = true;
   scoreText.visible = false;
 }
@@ -241,16 +208,14 @@ function endGame() {
 
 function ballLeftBounds() {
   if (ball.x < 0) {
-    scorePaddle2++;
-    //player2.score++;
+    player2.score++;
   } else if (ball.x > game.world.width) {
-    scorePaddle1++;
-    //player1.score++;
+    player1.score++;
   }
 
-  scoreText.text = `${scorePaddle1} - ${scorePaddle2}`;
+  scoreText.text = `${player1.score} - ${player2.score}`;
 
-  if (scorePaddle1 == MAX_SCORE || scorePaddle2 == MAX_SCORE) {
+  if (player1.score == MAX_SCORE || player2.score == MAX_SCORE) {
     endGame();
   } else {
     resetGame();
@@ -272,15 +237,5 @@ function ballHitPaddle(_ball, _paddle) {
     //  Ball is perfectly in the middle
     //  Add a little random X to stop it bouncing straight up!
     _ball.body.velocity.y = 2 + Math.random() * 8;
-  }
-}
-
-/*Paddle Functions*/
-
-function limitPaddleBoundaries(paddle) {
-  if (paddle.y < 30) {
-    paddle.y = 30;
-  } else if (paddle.y > game.height - 30) {
-    paddle.y = game.height - 30;
   }
 }
