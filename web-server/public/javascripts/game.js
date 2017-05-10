@@ -1,5 +1,4 @@
-var game = new Phaser.Game(1280, 720, Phaser.AUTO, 'game-container', { preload: preload, create: create, update: update });
-//To test in virtual machines, use Phaser.CANVAS. Otherwise, use Phaser.AUTO.
+var game = new Phaser.Game(1280, 720, Phaser.CANVAS, 'game-container', { preload: preload, create: create, update: update });
 
 function preload() {
   game.load.atlas('breakout', 'assets/breakout.png', 'assets/breakout.json');
@@ -70,10 +69,18 @@ function createKeys() {
 }
 
 function createTexts() {
-  introText = game.add.text(game.world.centerX, game.world.centerY + 50, '- press enter to start -', { font: "40px Arial", fill: "#666666", align: "center" });
+  introText = game.add.text(game.world.centerX, game.world.centerY + 50, '- press enter to start -', {
+    font: "40px Arial",
+    fill: "#666666",
+    align: "center"
+  });
   introText.anchor.setTo(0.5, 0.5);
 
-  scoreText = game.add.text(game.world.centerX, game.world.height - 50, `${scorePaddle1} - ${scorePaddle2}`, { font: "30px Arial", fill: "#666666", align: "center" });
+  scoreText = game.add.text(game.world.centerX, game.world.height - 50, `${scorePaddle1} - ${scorePaddle2}`, {
+    font: "30px Arial",
+    fill: "#666666",
+    align: "center"
+  });
   scoreText.anchor.setTo(0.5, 0.5);
   scoreText.visible = false;
 }
