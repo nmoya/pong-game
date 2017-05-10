@@ -1,8 +1,21 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+* {
+  cursor: none;
 }
 
-a {
-  color: #00B7FF;
+p {
+  color: #fff;
+}
+
+body {
+  background-color: #000;
+}
+
+.container {
+  border-top-width: 2px;
+  border-bottom-width: 2px;
+  border-left-width: 0px;
+  border-right-width: 0px;
+  border-color: #ffffff;
+  border-style: solid;
+  position: absolute;
 }
