@@ -105,7 +105,7 @@ function update() {
   limitPaddleBoundaries(paddle1);
   limitPaddleBoundaries(paddle2);
 
-  if (!isBallReady) {
+  if (!isBallReady && !isGameOver) {
     game.physics.arcade.collide(ball, paddle1, ballHitPaddle, null, this);
     game.physics.arcade.collide(ball, paddle2, ballHitPaddle, null, this);
   }
