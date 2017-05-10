@@ -40,6 +40,9 @@ var introText;
 var startKey;
 var leftPaddleKeys;
 
+var player1;
+var player2;
+
 /*Creation Functions*/
 
 function create() {
@@ -51,13 +54,49 @@ function create() {
 
   background = game.add.tileSprite(0, 0, 1280, 720, 'field');
 
+  //if player object works, start comment
   paddle1 = createPaddle(PADDLE_X_OFFSET, game.world.centerY, 'paddle-left');
   paddle2 = createPaddle(game.world.width - PADDLE_X_OFFSET, game.world.centerY, 'paddle-right');
+  //if player object works, end comment
 
   ball = createBall(game.world.centerX, game.world.centerY, 'ball_1.png')
 
+  player1 = createPlayer({ x: PADDLE_X_OFFSET, y: game.world.centerY, asset: 'paddle-left' }, true);
+  player2 = createPlayer({ x: game.world.width - PADDLE_X_OFFSET, y: game.world.centerY, asset: 'paddle-right' }, false);
+
+  //if player object works, comment line bellow
   createKeys();
+
   createTexts();
+}
+
+function createPlayer(paddleInfo, addKeys) {
+  var player = { paddle: createPaddle(paddleInfo.x, paddleInfo.y, paddleInfo.asset), score: 0 };
+
+  player.movePaddle = function() {
+    if (this.keys === undefined) {
+      return;
+    }
+    if (this.keys.up.isDown) {
+      this.paddle1.y -= KEYBOARD_MOVEMENT_SPEED;
+    } else if (this.keys.down.isDown) {
+      this.paddle1.y += KEYBOARD_MOVEMENT_SPEED;
+    }
+
+    this.limitPaddleMovements();
+  }
+
+  player.limitPaddleMovements = function() {
+    if (this.paddle.y < 30) {
+      this.paddle.y = 30;
+    } else if (this.paddle.y > game.height - 30) {
+      this.paddle.y = game.height - 30;
+    }
+  };
+
+  if (addKeys) {
+    player.keys = createKeys();
+  }
 }
 
 function createKeys() {
@@ -111,6 +150,11 @@ function createBall(x, y) {
 
 function update() {
 
+  //player2.paddle.y = game.input.y;
+  //player2.limitPaddleMovements();
+  //player1.movePaddle();
+
+  //if player object works, start comment
   paddle2.y = game.input.y;
   if (leftPaddleKeys.up.isDown) {
     paddle1.y -= KEYBOARD_MOVEMENT_SPEED;
@@ -120,6 +164,7 @@ function update() {
 
   limitPaddleBoundaries(paddle1);
   limitPaddleBoundaries(paddle2);
+  //if player object works, end comment
 
   if (!isBallReady && !isGameOver) {
     game.physics.arcade.collide(ball, paddle1, ballHitPaddle, null, this);
@@ -173,6 +218,9 @@ function resetGame() {
     scorePaddle1 = 0;
     scorePaddle2 = 0;
 
+    //player1.score = 0;
+    //player2.score = 0;
+
     scoreText.text = '0 - 0';
   }
 }
@@ -194,8 +242,10 @@ function endGame() {
 function ballLeftBounds() {
   if (ball.x < 0) {
     scorePaddle2++;
+    //player2.score++;
   } else if (ball.x > game.world.width) {
     scorePaddle1++;
+    //player1.score++;
   }
 
   scoreText.text = `${scorePaddle1} - ${scorePaddle2}`;
