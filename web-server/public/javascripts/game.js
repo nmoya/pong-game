@@ -1,4 +1,5 @@
 var game = new Phaser.Game(1280, 720, Phaser.AUTO, 'game-container', { preload: preload, create: create, update: update });
+//To test in virtual machines, use Phaser.CANVAS.
 
 function preload() {
   game.load.atlas('breakout', 'assets/breakout.png', 'assets/breakout.json');
@@ -16,7 +17,7 @@ var PADDLE_X_OFFSET = 100;
 var BALL_SPEED_START = 600;
 var BALL_SPEED_INCREMENT = 100;
 
-var MAX_SCORE = 1;
+var MAX_SCORE = 3;
 
 /*Global Variables*/
 
@@ -141,17 +142,21 @@ function startGame() {
 }
 
 function resetGame() {
+  clearInterval(ballTimer);
+
   isBallReady = true;
 
   ball.reset(game.world.centerX, game.world.centerY);
   ball.animations.stop('spin');
+
+  introText.text = `- click to ${isGameOver ? 'start' : 'continue'} -`;
+  introText.visible = true;
 
   if (isGameOver) {
     isGameOver = false;
     scorePaddle1 = 0;
     scorePaddle2 = 0;
 
-    introText.text = '- click to start -';
     scoreText.text = '0 - 0';
   }
 }
