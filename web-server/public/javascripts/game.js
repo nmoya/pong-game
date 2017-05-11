@@ -29,34 +29,15 @@ var introText;
 var player1;
 var player2;
 
-/*Creation Functions*/
-
-function create() {
-  game.physics.startSystem(Phaser.Physics.ARCADE);
-
-  //check bounds collisions only against top and bottom walls
-  game.physics.arcade.checkCollision.right = false;
-  game.physics.arcade.checkCollision.left = false;
-
-  game.add.tileSprite(0, 0, 1280, 720, 'field');
-  ball = Ball({ game: game, x: game.world.centerX, y: game.world.centerY, asset: 'ball_1.png' });
-
-  player1 = Player({ x: PADDLE_X_OFFSET, y: game.world.centerY, asset: 'paddle-left' }, true);
-  player2 = Player({ x: game.world.width - PADDLE_X_OFFSET, y: game.world.centerY, asset: 'paddle-right' }, false);
-
-  // Sets ENTER as the game start key
-  game.input.keyboard.addKey(Phaser.Keyboard.ENTER).onDown.add(checkGameState, this);
-
-  createTexts();
-}
+/* Instance Functions */
 
 function Player(options, isKeyboard) {
-  var player = { paddle: createPaddle(options.x, options.y, options.asset), score: 0 };
+  var _player = { paddle: Paddle(options.x, options.y, options.asset), score: 0 };
 
-  player.movePaddle = function (gameInput) {
-    if (this.keys === undefined && gameInput) {
+  _player.movePaddle = function (gameInput) {
+    if (gameInput) {
       this.paddle.y = gameInput.y;
-    } else {
+    } else if (this.keys !== undefined) {
       if (this.keys.up.isDown) {
         this.paddle.y -= KEYBOARD_MOVEMENT_SPEED;
       } else if (this.keys.down.isDown) {
@@ -64,9 +45,9 @@ function Player(options, isKeyboard) {
       }
     }
     this.limitPaddleMovements();
-  }
+  };
 
-  player.limitPaddleMovements = function () {
+  _player.limitPaddleMovements = function () {
     if (this.paddle.y < 30) {
       this.paddle.y = 30;
     } else if (this.paddle.y > game.height - 30) {
@@ -75,56 +56,76 @@ function Player(options, isKeyboard) {
   };
 
   if (isKeyboard) {
-    player.keys = createMovementKeys();
+    _player.keys = createMovementKeys();
   }
-  return player;
+
+  return _player;
 }
 
 function Ball(options) {
   var ballTimer;
 
-  var ball = options.game.add.sprite(options.x, options.y, 'breakout', options.asset);
-  ball.isReady = true;
-  ball.sprite.anchor.set(0.5);
-  ball.sprite.checkWorldBounds = true;
-  options.game.physics.enable(ball.sprite, Phaser.Physics.ARCADE);
-  ball.sprite.body.collideWorldBounds = true;
-  ball.sprite.body.bounce.set(1);
-  ball.sprite.animations.add('spin', ['ball_1.png', 'ball_2.png', 'ball_3.png', 'ball_4.png', 'ball_5.png'], 50,
-    true,
-    false);
-  ball.sprite.events.onOutOfBounds.add(ballLeftBounds, this);
+  var _ball = options.game.add.sprite(options.x, options.y, 'breakout', options.asset);
+  _ball.isReady = true;
+  _ball.sprite.anchor.set(0.5);
+  _ball.sprite.checkWorldBounds = true;
+  options.game.physics.enable(_ball.sprite, Phaser.Physics.ARCADE);
+  _ball.sprite.body.collideWorldBounds = true;
+  _ball.sprite.body.bounce.set(1);
+  _ball.sprite.animations.add('spin', ['ball_1.png', 'ball_2.png', 'ball_3.png', 'ball_4.png', 'ball_5.png'], 50, true, false);
+  _ball.sprite.events.onOutOfBounds.add(ballLeftBounds, this);
 
-  ball.stop = function () {
-    ball.isReady = true;
+  _ball.stop = function () {
+    this.isReady = true;
     clearInterval(this.ballTimer);
-    ball.sprite.reset(game.world.centerX, game.world.centerY);
-    ball.sprite.animations.stop('spin');
-    ball.sprite.body.velocity.setTo(0, 0);
+    this.sprite.reset(game.world.centerX, game.world.centerY);
+    this.sprite.animations.stop('spin');
+    this.sprite.body.velocity.setTo(0, 0);
   }
 
-  ball.start = function () {
-    ball.isReady = false;
-    ball.sprite.body.velocity.y = 0;
-    ball.sprite.body.velocity.x = (Math.round(Math.random() * 2) == 1 ? -1 : 1) * BALL_SPEED_START;
-    ball.sprite.animations.play('spin');
+  _ball.start = function () {
+    this.isReady = false;
+    this.sprite.body.velocity.y = 0;
+    this.sprite.body.velocity.x = (Math.round(Math.random() * 2) == 1 ? -1 : 1) * BALL_SPEED_START;
+    this.sprite.animations.play('spin');
 
     this.ballTimer = setInterval(function () {
-      if (ball.sprite.body.velocity.x < 0) {
-        ball.sprite.body.velocity.x -= BALL_SPEED_INCREMENT;
+      if (_ball.sprite.body.velocity.x < 0) {
+        _ball.sprite.body.velocity.x -= BALL_SPEED_INCREMENT;
       } else {
-        ball.sprite.body.velocity.x += BALL_SPEED_INCREMENT;
+        _ball.sprite.body.velocity.x += BALL_SPEED_INCREMENT;
       }
     }, 1000);
   }
 
-  return ball;
+  return _ball;
+}
+
+function Paddle(x, y, asset) {
+  var _paddle = game.add.sprite(x, y, asset);
+  _paddle.anchor.setTo(0.5, 0.5);
+  game.physics.enable(_paddle, Phaser.Physics.ARCADE);
+  _paddle.body.collideWorldBounds = true;
+  _paddle.body.bounce.set(1);
+  _paddle.body.immovable = true;
+  return _paddle;
+}
+
+/*Creation Functions*/
+
+function create() {
+  configureGame()
+
+  ball = Ball({ game: game, x: game.world.centerX, y: game.world.centerY, asset: 'ball_1.png' });
+  player1 = Player({ x: PADDLE_X_OFFSET, y: game.world.centerY, asset: 'paddle-left' }, true);
+  player2 = Player({ x: game.world.width - PADDLE_X_OFFSET, y: game.world.centerY, asset: 'paddle-right' }, false);
+
+  createTexts();
 }
 
 function createMovementKeys() {
   //for cursor keys, use game.input.keyboard.createCursorKeys()
   var keys = game.input.keyboard.addKeys({ 'up': Phaser.Keyboard.W, 'down': Phaser.Keyboard.S });
-
   return keys;
 }
 
@@ -145,20 +146,9 @@ function createTexts() {
   scoreText.visible = false;
 }
 
-function createPaddle(x, y, asset) {
-  var paddle = game.add.sprite(x, y, asset);
-  paddle.anchor.setTo(0.5, 0.5);
-  game.physics.enable(paddle, Phaser.Physics.ARCADE);
-  paddle.body.collideWorldBounds = true;
-  paddle.body.bounce.set(1);
-  paddle.body.immovable = true;
-  return paddle;
-}
-
 /*Update Functions*/
 
 function update() {
-
   player1.movePaddle(game.input);
   player2.movePaddle(game.input);
 
@@ -168,7 +158,20 @@ function update() {
   }
 }
 
-/*Game State Functions*/
+/*Game Functions*/
+
+function configureGame() {
+  game.physics.startSystem(Phaser.Physics.ARCADE);
+
+  //check bounds collisions only against top and bottom walls
+  game.physics.arcade.checkCollision.right = false;
+  game.physics.arcade.checkCollision.left = false;
+
+  game.add.tileSprite(0, 0, 1280, 720, 'field');
+
+  // Sets ENTER as the game start key
+  game.input.keyboard.addKey(Phaser.Keyboard.ENTER).onDown.add(checkGameState, this);
+}
 
 function checkGameState() {
   if (ball.isReady) {
@@ -194,6 +197,7 @@ function resetGame() {
 
   if (isGameOver) {
     isGameOver = false;
+
     player1.score = 0;
     player2.score = 0;
 
