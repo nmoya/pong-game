@@ -35,7 +35,7 @@ function Player(options, isKeyboard) {
   var _player = { paddle: Paddle(options.x, options.y, options.asset), score: 0 };
 
   _player.movePaddle = function (gameInput) {
-    if (gameInput) {
+    if (this.keys === undefined && gameInput) {
       this.paddle.y = gameInput.y;
     } else if (this.keys !== undefined) {
       if (this.keys.up.isDown) {
@@ -65,14 +65,15 @@ function Player(options, isKeyboard) {
 function Ball(options) {
   var ballTimer;
 
-  var _ball = options.game.add.sprite(options.x, options.y, 'breakout', options.asset);
+  var _ball = { sprite: options.game.add.sprite(options.x, options.y, 'breakout', options.asset) };
   _ball.isReady = true;
   _ball.sprite.anchor.set(0.5);
   _ball.sprite.checkWorldBounds = true;
   options.game.physics.enable(_ball.sprite, Phaser.Physics.ARCADE);
   _ball.sprite.body.collideWorldBounds = true;
   _ball.sprite.body.bounce.set(1);
-  _ball.sprite.animations.add('spin', ['ball_1.png', 'ball_2.png', 'ball_3.png', 'ball_4.png', 'ball_5.png'], 50, true, false);
+  _ball.sprite.animations.add('spin', ['ball_1.png', 'ball_2.png', 'ball_3.png', 'ball_4.png', 'ball_5.png'], 50, true,
+    false);
   _ball.sprite.events.onOutOfBounds.add(ballLeftBounds, this);
 
   _ball.stop = function () {
