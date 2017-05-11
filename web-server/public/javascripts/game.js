@@ -1,5 +1,5 @@
 var game = new Phaser.Game(1280, 720, Phaser.AUTO, 'game-container', { preload: preload, create: create, update: update });
-//To test in virtual machines, use Phaser.CANVAS.
+//To test in virtual machines, use Phaser.CANVAS. Otherwise, use Phaser.AUTO.
 
 function preload() {
   game.load.atlas('breakout', 'assets/breakout.png', 'assets/breakout.json');
@@ -21,6 +21,8 @@ var MAX_SCORE = 3;
 
 /*Global Variables*/
 
+var background;
+
 var ball;
 var paddle1;
 var paddle2;
@@ -36,38 +38,44 @@ var scorePaddle2 = 0;
 var scoreText;
 var introText;
 
-var cursors;
-
-var s;
+var startKey;
+var leftPaddleKeys;
 
 /*Creation Functions*/
 
 function create() {
-
   game.physics.startSystem(Phaser.Physics.ARCADE);
 
-  //  We check bounds collisions against all walls other than the bottom one
+  //check bounds collisions only against top and bottom walls
   game.physics.arcade.checkCollision.right = false;
   game.physics.arcade.checkCollision.left = false;
 
-  s = game.add.tileSprite(0, 0, 1280, 720, 'field');
+  background = game.add.tileSprite(0, 0, 1280, 720, 'field');
 
   paddle1 = createPaddle(PADDLE_X_OFFSET, game.world.centerY, 'paddle-left');
   paddle2 = createPaddle(game.world.width - PADDLE_X_OFFSET, game.world.centerY, 'paddle-right');
 
   ball = createBall(game.world.centerX, game.world.centerY, 'ball_1.png')
 
-  cursors = game.input.keyboard.createCursorKeys();
+  createKeys();
+  createTexts();
+}
 
-  scoreText = game.add.text(game.world.centerX, game.world.height - 50, `${scorePaddle1} - ${scorePaddle2}`, {
-    font: "20px Arial",
-    fill: "#ffffff",
-    align: "left"
-  });
-  introText = game.add.text(game.world.centerX, 400, '- click to start -', { font: "40px Arial", fill: "#ffffff", align: "center" });
+function createKeys() {
+  //for cursor keys, use game.input.keyboard.createCursorKeys()
+  leftPaddleKeys = game.input.keyboard.addKeys({ 'up': Phaser.Keyboard.W, 'down': Phaser.Keyboard.S });
+
+  startKey = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+  startKey.onDown.add(checkGameState, this);
+}
+
+function createTexts() {
+  introText = game.add.text(game.world.centerX, game.world.centerY + 50, '- press enter to start -', { font: "40px Arial", fill: "#666666", align: "center" });
   introText.anchor.setTo(0.5, 0.5);
 
-  game.input.onDown.add(checkGameState, this);
+  scoreText = game.add.text(game.world.centerX, game.world.height - 50, `${scorePaddle1} - ${scorePaddle2}`, { font: "30px Arial", fill: "#666666", align: "center" });
+  scoreText.anchor.setTo(0.5, 0.5);
+  scoreText.visible = false;
 }
 
 function createPaddle(x, y, asset) {
@@ -97,9 +105,9 @@ function createBall(x, y) {
 function update() {
 
   paddle2.y = game.input.y;
-  if (cursors.up.isDown) {
+  if (leftPaddleKeys.up.isDown) {
     paddle1.y -= KEYBOARD_MOVEMENT_SPEED;
-  } else if (cursors.down.isDown) {
+  } else if (leftPaddleKeys.down.isDown) {
     paddle1.y += KEYBOARD_MOVEMENT_SPEED;
   }
 
@@ -131,6 +139,7 @@ function startGame() {
   ball.animations.play('spin');
 
   introText.visible = false;
+  scoreText.visible = true;
 
   ballTimer = setInterval(function () {
     if (ball.body.velocity.x < 0) {
@@ -149,7 +158,7 @@ function resetGame() {
   ball.reset(game.world.centerX, game.world.centerY);
   ball.animations.stop('spin');
 
-  introText.text = `- click to ${isGameOver ? 'start' : 'continue'} -`;
+  introText.text = `- press enter to ${isGameOver ? 'start' : 'continue'} -`;
   introText.visible = true;
 
   if (isGameOver) {
@@ -170,6 +179,7 @@ function endGame() {
 
   introText.text = "Player " + (scorePaddle1 == MAX_SCORE ? "One" : "Two") + " Wins";
   introText.visible = true;
+  scoreText.visible = false;
 }
 
 /*Ball Functions*/
