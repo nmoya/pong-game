@@ -12,6 +12,7 @@ function preload() {
 var KEYBOARD_MOVEMENT_SPEED = 18;
 
 var PADDLE_X_OFFSET = 50;
+var PADDLE_ACCELERATION = 2000;
 
 var BALL_SPEED_START = 600;
 var BALL_SPEED_INCREMENT = 50;
@@ -38,10 +39,11 @@ function Player(options, isKeyboard) {
     if (this.keys === undefined && gameInput) {
       this.paddle.y = gameInput.y;
     } else if (this.keys !== undefined) {
+      this.paddle.body.acceleration.set(0, 0);
       if (this.keys.up.isDown) {
-        this.paddle.y -= KEYBOARD_MOVEMENT_SPEED;
+        this.paddle.body.acceleration.set(0, -PADDLE_ACCELERATION);
       } else if (this.keys.down.isDown) {
-        this.paddle.y += KEYBOARD_MOVEMENT_SPEED;
+        this.paddle.body.acceleration.set(0, PADDLE_ACCELERATION);
       }
     }
     this.limitPaddleMovements();
@@ -107,6 +109,8 @@ function Paddle(x, y, asset) {
   _paddle.anchor.setTo(0.5, 0.5);
   game.physics.enable(_paddle, Phaser.Physics.ARCADE);
   _paddle.body.collideWorldBounds = true;
+  _paddle.body.maxVelocity.set(0, 500);
+  _paddle.body.drag.set(0, PADDLE_ACCELERATION);
   _paddle.body.bounce.set(1);
   _paddle.body.immovable = true;
   return _paddle;
