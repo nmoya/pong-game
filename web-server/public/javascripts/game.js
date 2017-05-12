@@ -1,4 +1,9 @@
-var game = new Phaser.Game(1280, 720, Phaser.CANVAS, 'game-container', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(1280, 720, Phaser.CANVAS, 'game-container', {
+  preload: preload,
+  create: create,
+  update: update,
+  render: render
+});
 
 function preload() {
   game.load.atlas('breakout', 'assets/breakout.png', 'assets/breakout.json');
@@ -66,6 +71,7 @@ function Player(options, isKeyboard) {
 
 function Ball(options) {
   var ballTimer;
+  var lastPosition = null;
 
   var _ball = { sprite: options.game.add.sprite(options.x, options.y, 'breakout', options.asset) };
   _ball.isReady = true;
@@ -84,6 +90,24 @@ function Ball(options) {
     this.sprite.reset(game.world.centerX, game.world.centerY);
     this.sprite.animations.stop('spin');
     this.sprite.body.velocity.setTo(0, 0);
+    lastPosition = null;
+  }
+  _ball.drawTrajectory = function () {
+    var line;
+    if (lastPosition) {
+      var current = { x: _ball.sprite.x, y: _ball.sprite.y };
+      var slope = (lastPosition.y - current.y) / (lastPosition.x - current.x);
+      var b = current.y - (slope * current.x);
+      if (_ball.sprite.body.velocity.x < 0) {
+        line = new Phaser.Line(current.x, current.y, 0, b);
+        line.centerOn((current.x + 0) / 2, (current.y + b) / 2);
+      } else {
+        line = new Phaser.Line(current.x, current.y, options.game.width, (slope * options.game.width) + b)
+        line.centerOn((current.x + options.game.width) / 2, (current.y + ((slope * options.game.width) + b)) / 2);
+      }
+    }
+    lastPosition = { x: _ball.sprite.x, y: _ball.sprite.y };
+    return line;
   }
 
   _ball.start = function () {
@@ -152,6 +176,10 @@ function createTexts() {
 }
 
 /*Update Functions*/
+
+function render() {
+  game.debug.geom(ball.drawTrajectory(), "#ccc");
+}
 
 function update() {
   player1.movePaddle(game.input);
